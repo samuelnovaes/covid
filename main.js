@@ -17,7 +17,7 @@ const populate = (title, data, fn) => {
 			labels,
 			datasets: [
 				{
-					label: `Brasil (${countBrazil[countBrazil.length - 1]})`,
+					label: 'Brasil',
 					data: countBrazil,
 					fill: false,
 					borderColor: 'rgb(0,0,255)',
@@ -25,7 +25,7 @@ const populate = (title, data, fn) => {
 					radius: 0
 				},
 				{
-					label: `Itália (${countItaly[countItaly.length - 1]})`,
+					label: 'Itália',
 					data: countItaly,
 					fill: false,
 					borderColor: 'rgb(255,0,0)',
@@ -41,6 +41,11 @@ const populate = (title, data, fn) => {
 			},
 			legend: {
 				onClick: false
+			},
+			tooltips: {
+				mode: 'index',
+				intersect: false,
+				displayColors: false
 			}
 		}
 	});

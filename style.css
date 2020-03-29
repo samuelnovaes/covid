@@ -28,6 +28,11 @@ header {
 	display: none;
 }
 
+header span {
+	font-weight: normal;
+	font-size: 10pt;
+}
+
 #error {
 	display: none;
 	color: red;

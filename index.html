@@ -4,94 +4,23 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<meta name="description" content="Gráficos de evolução dos números de casos e mortes do covid-19 no Brasil em relação à Itália.">
-	<meta name="keywords" content="coronavírus,saars,saars-cov-2,covid,covid-19,doença,brasil,itália,vírus,evolução,gráfico">
+	<meta name="description"
+		content="Gráficos de evolução dos números de casos e mortes do covid-19 no Brasil em relação à Itália.">
+	<meta name="keywords"
+		content="coronavírus,saars,saars-cov-2,covid,covid-19,doença,brasil,itália,vírus,evolução,gráfico">
 	<meta name="author" content="Samuel Novaes Sena">
 	<meta name="google-site-verification" content="emXdhFmavpd2l4HhBMZdkyUHnuaIQc5CcKeLPqQWoTs">
 	<link rel="shortcut icon" href="icon.png" type="image/png">
 	<title>EVOLUÇÃO DO COVID-19 NO BRASIL</title>
-	<style>
-		* {
-			font-family: Arial, Helvetica, sans-serif;
-			margin: 0;
-			padding: 0;
-		}
-
-		body {
-			background-color: #fff;
-			color: #000;
-			overflow-y: scroll;
-			overflow-x: hidden;
-		}
-
-		canvas {
-			margin: 0 auto;
-			background-color: #fff;
-			margin-top: 1em;
-			margin-bottom: 1em;
-			max-width: 1000px;
-		}
-
-		header {
-			text-align: center;
-			font-size: 1em;
-			font-weight: bold;
-			background-color: #eee;
-			padding: 1em 0 1em 0;
-			display: none;
-		}
-
-		#error {
-			display: none;
-			color: red;
-			background-color: rgb(255, 184, 184);
-			position: absolute;
-			width: 100vw;
-			text-align: center;
-			padding: 1em 0 1em 0;
-			top: 50%;
-			left: 50%;
-			transform: translate(-50%, -50%);
-		}
-
-		#loader {
-			display: inline-block;
-			width: 80px;
-			height: 80px;
-			position: fixed;
-			top: 50%;
-			left: 50%;
-			transform: translate(-50%, -50%);
-		}
-
-		#loader:after {
-			content: " ";
-			display: block;
-			width: 64px;
-			height: 64px;
-			margin: 8px;
-			border-radius: 50%;
-			border: 6px solid #00f;
-			border-color: #00f transparent #00f transparent;
-			animation: loader 1.2s linear infinite;
-		}
-
-		@keyframes loader {
-			0% {
-				transform: rotate(0deg);
-			}
-
-			100% {
-				transform: rotate(360deg);
-			}
-		}
-	</style>
+	<link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 	<header>EVOLUÇÃO DO COVID-19 NO BRASIL</header>
+
 	<div id="loader"></div>
 	<div id="error">Erro ao carregar os dados.<br>Atualize a página.</div>
+
 	<!-- Global site tag (gtag.js) - Google Analytics -->
 	<script async src="https://www.googletagmanager.com/gtag/js?id=UA-112619005-2"></script>
 	<script>
@@ -101,68 +30,9 @@
 
 		gtag('config', 'UA-112619005-2');
 	</script>
+
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.min.js"></script>
-	<script>
-		(async () => {
-			const loader = document.getElementById('loader');
-			const error = document.getElementById('error');
-			const header = document.getElementsByTagName('header')[0];
-			try {
-				const data = await (await fetch('https://pomber.github.io/covid19/timeseries.json')).json();
-				const daysInBrazil = data.Brazil.filter((x) => x.confirmed > 0).length;
-				const labels = Array(daysInBrazil).fill(0).map((x, i) => `${i + 1}º dia`);
-				const populate = (title, fn) => {
-					const countBrazil = data.Brazil.filter((x) => x.confirmed > 0).map(fn);
-					const countItaly = data.Italy.filter((x) => x.confirmed > 0).map(fn).filter((x, i) => i < daysInBrazil);
-					const element = document.createElement('canvas');
-					document.body.appendChild(element);
-					new Chart(element, {
-						type: 'line',
-						data: {
-							labels,
-							datasets: [
-								{
-									label: `Brasil (${countBrazil[countBrazil.length - 1]})`,
-									data: countBrazil,
-									fill: false,
-									borderColor: 'rgb(0,0,255)',
-									lineTension: 0,
-									radius: 0
-								},
-								{
-									label: `Itália (${countItaly[countItaly.length - 1]})`,
-									data: countItaly,
-									fill: false,
-									borderColor: 'rgb(255,0,0)',
-									lineTension: 0,
-									radius: 0
-								}
-							]
-						},
-						options: {
-							title: {
-								display: true,
-								text: title
-							},
-							legend: {
-								onClick: false
-							}
-						}
-					});
-				};
-				populate('Casos confirmados', (x) => x.confirmed);
-				populate('Mortes', (x) => x.deaths);
-				populate('Casos recuperados', (x) => x.recovered);
-				populate('Casos ativos', (x) => x.confirmed - x.recovered - x.deaths);
-				loader.style.display = 'none';
-				header.style.display = 'block';
-			}
-			catch (err) {
-				loader.style.display = 'none';
-				error.style.display = 'block';
-			}
-		})();
-	</script>
+	<script src="main.js"></script>
 </body>
 
 </html>

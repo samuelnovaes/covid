@@ -46,6 +46,10 @@ header span {
 	transform: translate(-50%, -50%);
 }
 
+#extender {
+	transform: translateY(2px);
+}
+
 #loader {
 	display: inline-block;
 	width: 80px;

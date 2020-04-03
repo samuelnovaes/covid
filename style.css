@@ -28,9 +28,21 @@ header {
 	display: none;
 }
 
-header span {
+header p {
 	font-weight: normal;
 	font-size: 10pt;
+}
+
+header #controls {
+	margin-top: 1em;
+}
+
+header #controls select {
+	max-width: 110px;
+}
+
+header #controls button {
+	padding: 0 5px 0 5px;
 }
 
 #error {

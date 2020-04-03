@@ -9,7 +9,7 @@ const charts = [];
 
 let data;
 let countryA = 'Brazil';
-let countryB = 'Spain';
+let countryB = 'Italy';
 
 const populate = (title, bar, fn) => {
 	const days = data[countryA].filter((x) => x.confirmed > 0).length;

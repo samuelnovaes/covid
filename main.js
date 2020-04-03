@@ -5,7 +5,7 @@ const container = document.getElementById('charts');
 const checkbox = document.getElementById('extender');
 const charts = [];
 
-const populate = (title, data, extend, fn) => {
+const populate = (title, data, extend, bar, fn) => {
 	const days = data[extend ? 'Italy' : 'Brazil'].filter((x) => x.confirmed > 0).length;
 	const labels = Array(days).fill(0).map((x, i) => `${i + 1}º dia`);
 	const countBrazil = data.Brazil.filter((x) => x.confirmed > 0).map(fn).filter((x, i) => i < days);
@@ -13,25 +13,25 @@ const populate = (title, data, extend, fn) => {
 	const element = document.createElement('canvas');
 	container.appendChild(element);
 	charts.push(new Chart(element, {
-		type: 'line',
+		type: bar ? 'bar' : 'line',
 		data: {
 			labels,
 			datasets: [
 				{
 					label: 'Brasil',
 					data: countBrazil,
-					fill: false,
-					borderColor: 'rgb(0,0,255)',
-					lineTension: 0,
-					radius: 0
+					...(bar ? { backgroundColor: 'rgb(0,0,255)' } : { borderColor: 'rgb(0,0,255)' }),
+					...(bar ? {} : { fill: false }),
+					...(bar ? {} : { lineTension: 0 }),
+					...(bar ? {} : { radius: 0 })
 				},
 				{
 					label: 'Itália',
 					data: countItaly,
-					fill: false,
-					borderColor: 'rgb(255,0,0)',
-					lineTension: 0,
-					radius: 0
+					...(bar ? { backgroundColor: 'rgb(255,0,0)' } : { borderColor: 'rgb(255,0,0)' }),
+					...(bar ? {} : { fill: false }),
+					...(bar ? {} : { lineTension: 0 }),
+					...(bar ? {} : { radius: 0 })
 				}
 			]
 		},
@@ -58,13 +58,13 @@ const populateAll = (data, extend = false) => {
 	}
 	charts.length = 0;
 	container.innerHTML = '';
-	populate('Casos totais', data, extend, (x) => x.confirmed);
-	populate('Casos diários', data, extend, (x, i, arr) => arr[i - 1] ? x.confirmed - arr[i - 1].confirmed : x.confirmed);
-	populate('Mortes totais', data, extend, (x) => x.deaths);
-	populate('Mortes diárias', data, extend, (x, i, arr) => arr[i - 1] ? x.deaths - arr[i - 1].deaths : x.deaths);
-	populate('Casos recuperados', data, extend, (x) => x.recovered);
-	populate('Casos recuperados diários', data, extend, (x, i, arr) => arr[i - 1] ? x.recovered - arr[i - 1].recovered : x.recovered);
-	populate('Casos ativos', data, extend, (x) => x.confirmed - x.recovered - x.deaths);
+	populate('Casos totais', data, extend, false, (x) => x.confirmed);
+	populate('Casos diários', data, extend, true, (x, i, arr) => arr[i - 1] ? x.confirmed - arr[i - 1].confirmed : x.confirmed);
+	populate('Mortes totais', data, extend, false, (x) => x.deaths);
+	populate('Mortes diárias', data, extend, true, (x, i, arr) => arr[i - 1] ? x.deaths - arr[i - 1].deaths : x.deaths);
+	populate('Casos recuperados', data, extend, false, (x) => x.recovered);
+	populate('Casos recuperados diários', data, extend, true, (x, i, arr) => arr[i - 1] ? x.recovered - arr[i - 1].recovered : x.recovered);
+	populate('Casos ativos', data, extend, false, (x) => x.confirmed - x.recovered - x.deaths);
 }
 
 (async () => {

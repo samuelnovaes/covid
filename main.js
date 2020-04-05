@@ -9,7 +9,7 @@ const charts = [];
 
 let data;
 let countryA = 'Brazil';
-let countryB = 'Italy';
+let countryB;
 
 const populate = (title, bar, fn) => {
 	const days = data[countryA].filter((x) => x.confirmed > 0).length;
@@ -109,17 +109,25 @@ reverse.onclick = () => {
 (async () => {
 	try {
 		data = await (await fetch('https://pomber.github.io/covid19/timeseries.json')).json();
-		
-		for (const country in data) {
-			if (data[country][0].confirmed == 0) {
-				const optionA = document.createElement('option');
-				const optionB = document.createElement('option');
-				optionA.value = optionB.value = country;
-				optionA.innerText = optionB.innerText = country;
-				selectA.appendChild(optionA);
-				selectB.appendChild(optionB);
-			}
+		const countries = Object.keys(data).filter(x => data[x][0].confirmed == 0);
+
+		countries.sort((a, b) => {
+			const aLast = data[a][data[a].length - 1];
+			const bLast = data[b][data[b].length - 1];
+			return aLast.confirmed > bLast.confirmed ? -1 : 1
+		});
+
+		countryB = countries[0];
+
+		for (const country of countries) {
+			const optionA = document.createElement('option');
+			const optionB = document.createElement('option');
+			optionA.value = optionB.value = country;
+			optionA.innerText = optionB.innerText = country;
+			selectA.appendChild(optionA);
+			selectB.appendChild(optionB);
 		}
+
 		selectA.value = countryA;
 		selectB.value = countryB;
 
@@ -127,6 +135,7 @@ reverse.onclick = () => {
 		header.style.display = 'block';
 	}
 	catch (err) {
+		console.error(err.stack);
 		error.style.display = 'block';
 	}
 	loader.style.display = 'none';

@@ -11,7 +11,7 @@ let data;
 let countryA = 'Brazil';
 let countryB;
 
-const populate = (title, bar, fn) => {
+const populate = (title, fn) => {
 	const days = data[countryA].filter((x) => x.confirmed > 0).length;
 	const countA = data[countryA].filter((x) => x.confirmed > 0).map(fn).filter((x, i) => i < days);
 	const countB = data[countryB].filter((x) => x.confirmed > 0).map(fn).filter((x, i) => i < days);
@@ -32,25 +32,25 @@ const populate = (title, bar, fn) => {
 	container.appendChild(element);
 
 	charts.push(new Chart(element, {
-		type: bar ? 'bar' : 'line',
+		type: 'line',
 		data: {
 			labels,
 			datasets: [
 				{
 					label: countryA,
 					data: countA,
-					...(bar ? { backgroundColor: 'rgb(0,0,255)' } : { borderColor: 'rgb(0,0,255)' }),
-					...(bar ? {} : { fill: false }),
-					...(bar ? {} : { lineTension: 0 }),
-					...(bar ? {} : { radius: 0 })
+					borderColor: 'rgb(0,0,255)',
+					fill: false,
+					lineTension: 0,
+					radius: 0
 				},
 				{
 					label: countryB,
 					data: countB,
-					...(bar ? { backgroundColor: 'rgb(255,0,0)' } : { borderColor: 'rgb(255,0,0)' }),
-					...(bar ? {} : { fill: false }),
-					...(bar ? {} : { lineTension: 0 }),
-					...(bar ? {} : { radius: 0 })
+					borderColor: 'rgb(255,0,0)',
+					fill: false,
+					lineTension: 0,
+					radius: 0
 				}
 			]
 		},
@@ -78,13 +78,13 @@ const populateAll = () => {
 	charts.length = 0;
 	container.innerHTML = '';
 
-	populate('Total cases', false, (x) => x.confirmed);
-	populate('Daily cases', false, (x, i, arr) => arr[i - 1] ? x.confirmed - arr[i - 1].confirmed : x.confirmed);
-	populate('Total deaths', false, (x) => x.deaths);
-	populate('Daily deaths', false, (x, i, arr) => arr[i - 1] ? x.deaths - arr[i - 1].deaths : x.deaths);
-	populate('Total recovered', false, (x) => x.recovered);
-	populate('Daily recovered', false, (x, i, arr) => arr[i - 1] ? x.recovered - arr[i - 1].recovered : x.recovered);
-	populate('Active cases', false, (x) => x.confirmed - x.recovered - x.deaths);
+	populate('Total cases', (x) => x.confirmed);
+	populate('Daily cases', (x, i, arr) => arr[i - 1] ? x.confirmed - arr[i - 1].confirmed : x.confirmed);
+	populate('Total deaths', (x) => x.deaths);
+	populate('Daily deaths', (x, i, arr) => arr[i - 1] ? x.deaths - arr[i - 1].deaths : x.deaths);
+	populate('Total recovered', (x) => x.recovered);
+	populate('Daily recovered', (x, i, arr) => arr[i - 1] ? x.recovered - arr[i - 1].recovered : x.recovered);
+	populate('Active cases', (x) => x.confirmed - x.recovered - x.deaths);
 }
 
 selectA.onchange = (e) => {

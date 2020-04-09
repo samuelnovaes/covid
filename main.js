@@ -79,11 +79,11 @@ const populateAll = () => {
 	container.innerHTML = '';
 
 	populate('Total cases', false, (x) => x.confirmed);
-	populate('Daily cases', true, (x, i, arr) => arr[i - 1] ? x.confirmed - arr[i - 1].confirmed : x.confirmed);
+	populate('Daily cases', false, (x, i, arr) => arr[i - 1] ? x.confirmed - arr[i - 1].confirmed : x.confirmed);
 	populate('Total deaths', false, (x) => x.deaths);
-	populate('Daily deaths', true, (x, i, arr) => arr[i - 1] ? x.deaths - arr[i - 1].deaths : x.deaths);
+	populate('Daily deaths', false, (x, i, arr) => arr[i - 1] ? x.deaths - arr[i - 1].deaths : x.deaths);
 	populate('Total recovered', false, (x) => x.recovered);
-	populate('Daily recovered', true, (x, i, arr) => arr[i - 1] ? x.recovered - arr[i - 1].recovered : x.recovered);
+	populate('Daily recovered', false, (x, i, arr) => arr[i - 1] ? x.recovered - arr[i - 1].recovered : x.recovered);
 	populate('Active cases', false, (x) => x.confirmed - x.recovered - x.deaths);
 }
 

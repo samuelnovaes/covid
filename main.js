@@ -109,7 +109,7 @@ reverse.onclick = () => {
 (async () => {
 	try {
 		data = await (await fetch('https://pomber.github.io/covid19/timeseries.json')).json();
-		const countries = Object.keys(data).filter(x => data[x][0].confirmed == 0);
+		const countries = Object.keys(data);
 
 		countries.sort((a, b) => {
 			const aLast = data[a][data[a].length - 1];

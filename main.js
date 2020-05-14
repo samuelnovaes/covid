@@ -11,7 +11,7 @@ let data;
 let countryA = 'Brazil';
 let countryB;
 
-const populate = (title, fn) => {
+const populate = (title, fn, bar = false) => {
 	const days = data[countryA].filter((x) => x.confirmed > 0).length;
 	const countA = data[countryA].filter((x) => x.confirmed > 0).map(fn).filter((x, i) => i < days);
 	const countB = data[countryB].filter((x) => x.confirmed > 0).map(fn).filter((x, i) => i < days);
@@ -32,25 +32,37 @@ const populate = (title, fn) => {
 	container.appendChild(element);
 
 	charts.push(new Chart(element, {
-		type: 'line',
+		type: bar ? 'bar' : 'line',
 		data: {
 			labels,
 			datasets: [
 				{
 					label: countryA,
 					data: countA,
-					borderColor: 'rgb(0,0,255)',
-					fill: false,
-					lineTension: 0,
-					radius: 0
+					...(bar ?
+						{
+							backgroundColor: 'rgb(0,0,255)'
+						} :
+						{
+							borderColor: 'rgb(0,0,255)',
+							fill: false,
+							lineTension: 0,
+							radius: 0
+						})
 				},
 				{
 					label: countryB,
 					data: countB,
-					borderColor: 'rgb(255,0,0)',
-					fill: false,
-					lineTension: 0,
-					radius: 0
+					...(bar ?
+						{
+							backgroundColor: 'rgb(255,0,0)'
+						} :
+						{
+							borderColor: 'rgb(255,0,0)',
+							fill: false,
+							lineTension: 0,
+							radius: 0
+						})
 				}
 			]
 		},
@@ -79,11 +91,11 @@ const populateAll = () => {
 	container.innerHTML = '';
 
 	populate('Total cases', (x) => x.confirmed);
-	populate('Daily cases', (x, i, arr) => arr[i - 1] ? x.confirmed - arr[i - 1].confirmed : x.confirmed);
+	populate('Daily cases', (x, i, arr) => arr[i - 1] ? x.confirmed - arr[i - 1].confirmed : x.confirmed, true);
 	populate('Total deaths', (x) => x.deaths);
-	populate('Daily deaths', (x, i, arr) => arr[i - 1] ? x.deaths - arr[i - 1].deaths : x.deaths);
+	populate('Daily deaths', (x, i, arr) => arr[i - 1] ? x.deaths - arr[i - 1].deaths : x.deaths, true);
 	populate('Total recovered', (x) => x.recovered);
-	populate('Daily recovered', (x, i, arr) => arr[i - 1] ? x.recovered - arr[i - 1].recovered : x.recovered);
+	populate('Daily recovered', (x, i, arr) => arr[i - 1] ? x.recovered - arr[i - 1].recovered : x.recovered, true);
 	populate('Active cases', (x) => x.confirmed - x.recovered - x.deaths);
 }
 
@@ -109,6 +121,18 @@ reverse.onclick = () => {
 (async () => {
 	try {
 		data = await (await fetch('https://pomber.github.io/covid19/timeseries.json')).json();
+		const dataBrazil = await (await fetch('https://xx9p7hp1p7.execute-api.us-east-1.amazonaws.com/prod/PortalCasos')).json();
+
+		const casosValidos = data.Brazil.filter(date => date.confirmed > 0);
+		data.Brazil = dataBrazil.dias.map((dia, i) => {
+			return {
+				confirmed: dia.casosAcumulado,
+				deaths: dia.obitosAcumulado,
+				recovered: (casosValidos[i] || {}).recovered,
+				date: (casosValidos[i] || { date: dia._id }).date
+			}
+		})
+
 		const countries = Object.keys(data);
 
 		countries.sort((a, b) => {

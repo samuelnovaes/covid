@@ -59,7 +59,7 @@ const populate = (title, data, fn, bar = false, avg7day) => {
 		options: {
 			title: {
 				display: true,
-				text: title
+				text: `${title} até ${data[data.length - 1]._id}`
 			},
 			legend: {
 				onClick: false
@@ -73,6 +73,13 @@ const populate = (title, data, fn, bar = false, avg7day) => {
 						return `${avg7day ? tooltipItem.datasetIndex == 0 ? 'Média: ' : 'Diário: ' : ''}${tooltipItem.yLabel.toLocaleString()}`
 					}
 				}
+			},
+			scales: {
+				yAxes: [{
+					ticks: {
+						callback: value => value.toLocaleString()
+					}
+				}]
 			}
 		}
 	}));

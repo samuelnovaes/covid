@@ -4,11 +4,11 @@ const container = document.getElementById('charts');
 const header = document.getElementsByTagName('header')[0];
 const charts = [];
 
-const populate = (title, data, fn, bar = false, avg7day) => {
+const populate = (title, data, fn, bar = false) => {
 	const computed = data.map(fn);
 	let avg7dayComputed;
 
-	if (avg7day) {
+	if (bar) {
 		avg7dayComputed = computed.map((x, i, arr) => {
 			const values = [];
 			for (let k = i; k > (i - 7); k--) {
@@ -29,7 +29,7 @@ const populate = (title, data, fn, bar = false, avg7day) => {
 		data: {
 			labels,
 			datasets: [
-				...(avg7day ? [
+				...(bar ? [
 					{
 						label: `Média (${avg7dayComputed[avg7dayComputed.length - 1].toLocaleString()})`,
 						data: avg7dayComputed,
@@ -42,7 +42,7 @@ const populate = (title, data, fn, bar = false, avg7day) => {
 				] : []),
 				{
 					data: computed,
-					label: `${avg7day ? 'Diário' : 'Total'} (${computed[computed.length - 1].toLocaleString()})`,
+					label: `${bar ? 'Diário' : 'Total'} (${computed[computed.length - 1].toLocaleString()})`,
 					...(bar ?
 						{
 							backgroundColor: 'rgb(0,0,255)'
@@ -70,7 +70,7 @@ const populate = (title, data, fn, bar = false, avg7day) => {
 				displayColors: false,
 				callbacks: {
 					label: tooltipItem => {
-						return `${avg7day ? tooltipItem.datasetIndex == 0 ? 'Média: ' : 'Diário: ' : ''}${tooltipItem.yLabel.toLocaleString()}`
+						return `${bar ? tooltipItem.datasetIndex == 0 ? 'Média: ' : 'Diário: ' : ''}${tooltipItem.yLabel.toLocaleString()}`
 					}
 				}
 			},
@@ -94,9 +94,9 @@ const populate = (title, data, fn, bar = false, avg7day) => {
 		}
 
 		populate('Casos acumulado', data, (x) => x.casosAcumulado);
-		populate('Casos novos', data, (x) => x.casosNovos, true, true);
+		populate('Casos novos', data, (x) => x.casosNovos, true);
 		populate('Óbitos acumulado', data, (x) => x.obitosAcumulado);
-		populate('Óbitos novos', data, (x) => x.obitosNovos, true, true);
+		populate('Óbitos novos', data, (x) => x.obitosNovos, true);
 
 		header.style.display = 'block';
 	}

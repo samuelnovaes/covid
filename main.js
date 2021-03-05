@@ -2,7 +2,6 @@ const loader = document.getElementById('loader');
 const error = document.getElementById('error');
 const container = document.getElementById('charts');
 const header = document.getElementsByTagName('header')[0];
-const charts = [];
 
 const populate = (title, data, fn, bar = false) => {
 	const daily = data.map(fn);
@@ -24,7 +23,7 @@ const populate = (title, data, fn, bar = false) => {
 	const element = document.createElement('canvas');
 	container.appendChild(element);
 
-	charts.push(new Chart(element, {
+	new Chart(element, {
 		type: bar ? 'bar' : 'line',
 		data: {
 			labels,
@@ -82,7 +81,7 @@ const populate = (title, data, fn, bar = false) => {
 				}]
 			}
 		}
-	}));
+	});
 };
 
 (async () => {

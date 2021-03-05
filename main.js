@@ -5,11 +5,11 @@ const header = document.getElementsByTagName('header')[0];
 const charts = [];
 
 const populate = (title, data, fn, bar = false) => {
-	const computed = data.map(fn);
-	let avg7dayComputed;
+	const daily = data.map(fn);
+	let avg7day;
 
 	if (bar) {
-		avg7dayComputed = computed.map((x, i, arr) => {
+		avg7day = daily.map((x, i, arr) => {
 			const values = [];
 			for (let k = i; k > (i - 7); k--) {
 				if (k >= 0) {
@@ -31,8 +31,8 @@ const populate = (title, data, fn, bar = false) => {
 			datasets: [
 				...(bar ? [
 					{
-						label: `Média (${avg7dayComputed[avg7dayComputed.length - 1].toLocaleString()})`,
-						data: avg7dayComputed,
+						label: `Média (${avg7day[avg7day.length - 1].toLocaleString()})`,
+						data: avg7day,
 						borderColor: 'rgb(255,0,0)',
 						fill: false,
 						lineTension: 0,
@@ -41,8 +41,8 @@ const populate = (title, data, fn, bar = false) => {
 					}
 				] : []),
 				{
-					data: computed,
-					label: `${bar ? 'Diário' : 'Total'} (${computed[computed.length - 1].toLocaleString()})`,
+					data: daily,
+					label: `${bar ? 'Diário' : 'Total'} (${daily[daily.length - 1].toLocaleString()})`,
 					...(bar ?
 						{
 							backgroundColor: 'rgb(0,0,255)'
@@ -88,10 +88,6 @@ const populate = (title, data, fn, bar = false) => {
 (async () => {
 	try {
 		const data = (await (await fetch('https://xx9p7hp1p7.execute-api.us-east-1.amazonaws.com/prod/PortalCasos')).json()).dias;
-
-		for (const chart of charts) {
-			chart.destroy();
-		}
 
 		populate('Casos acumulado', data, (x) => x.casosAcumulado);
 		populate('Casos novos', data, (x) => x.casosNovos, true);

@@ -1,33 +1,26 @@
 const loader = document.getElementById('loader');
 const error = document.getElementById('error');
-const header = document.getElementsByTagName('header')[0];
 const container = document.getElementById('charts');
-const selectA = document.getElementById('selectA');
-const selectB = document.getElementById('selectB');
-const reverse = document.getElementById('reverse');
+const header = document.getElementsByTagName('header')[0];
 const charts = [];
 
-let data;
-let countryA = 'Brazil';
-let countryB;
+const populate = (title, data, fn, bar = false, avg7day) => {
+	const computed = data.map(fn);
+	let avg7dayComputed;
 
-const populate = (title, fn, bar = false) => {
-	const days = data[countryA].filter((x) => x.confirmed > 0).length;
-	const countA = data[countryA].filter((x) => x.confirmed > 0).map(fn).filter((x, i) => i < days);
-	const countB = data[countryB].filter((x) => x.confirmed > 0).map(fn).filter((x, i) => i < days);
+	if (avg7day) {
+		avg7dayComputed = computed.map((x, i, arr) => {
+			const values = [];
+			for (let k = i; k > (i - 7); k--) {
+				if (k >= 0) {
+					values.push(arr[k])
+				}
+			}
+			return Math.round(values.reduce((acc, v) => acc + v, 0) / values.length);
+		});
+	}
 
-	const labels = Array(days).fill(0).map((x, i) => {
-		const day = i + 1;
-		let suffix = 'th';
-		if (day == 1) {
-			suffix = 'st';
-		}
-		else if (day == 2) {
-			suffix = 'nd';
-		}
-		return `${day}${suffix} day`;
-	});
-
+	const labels = data.map(d => d._id);
 	const element = document.createElement('canvas');
 	container.appendChild(element);
 
@@ -36,29 +29,26 @@ const populate = (title, fn, bar = false) => {
 		data: {
 			labels,
 			datasets: [
+				...(avg7day ? [
+					{
+						label: `Média (${avg7dayComputed[avg7dayComputed.length - 1].toLocaleString()})`,
+						data: avg7dayComputed,
+						borderColor: 'rgb(255,0,0)',
+						fill: false,
+						lineTension: 0,
+						radius: 0,
+						type: 'line'
+					}
+				] : []),
 				{
-					label: countryA,
-					data: countA,
+					data: computed,
+					label: `${avg7day ? 'Diário' : 'Total'} (${computed[computed.length - 1].toLocaleString()})`,
 					...(bar ?
 						{
 							backgroundColor: 'rgb(0,0,255)'
 						} :
 						{
 							borderColor: 'rgb(0,0,255)',
-							fill: false,
-							lineTension: 0,
-							radius: 0
-						})
-				},
-				{
-					label: countryB,
-					data: countB,
-					...(bar ?
-						{
-							backgroundColor: 'rgb(255,0,0)'
-						} :
-						{
-							borderColor: 'rgb(255,0,0)',
 							fill: false,
 							lineTension: 0,
 							radius: 0
@@ -77,90 +67,36 @@ const populate = (title, fn, bar = false) => {
 			tooltips: {
 				mode: 'index',
 				intersect: false,
-				displayColors: false
+				displayColors: false,
+				callbacks: {
+					label: tooltipItem => {
+						return `${avg7day ? tooltipItem.datasetIndex == 0 ? 'Média: ' : 'Diário: ' : ''}${tooltipItem.yLabel.toLocaleString()}`
+					}
+				}
 			}
 		}
 	}));
 };
 
-const populateAll = () => {
-	for (const chart of charts) {
-		chart.destroy();
-	}
-	charts.length = 0;
-	container.innerHTML = '';
-
-	populate('Total cases', (x) => x.confirmed);
-	populate('Daily cases', (x, i, arr) => arr[i - 1] ? x.confirmed - arr[i - 1].confirmed : x.confirmed, true);
-	populate('Total deaths', (x) => x.deaths);
-	populate('Daily deaths', (x, i, arr) => arr[i - 1] ? x.deaths - arr[i - 1].deaths : x.deaths, true);
-	populate('Total recovered', (x) => x.recovered);
-	populate('Daily recovered', (x, i, arr) => arr[i - 1] ? x.recovered - arr[i - 1].recovered : x.recovered, true);
-	populate('Active cases', (x) => x.confirmed - x.recovered - x.deaths);
-}
-
-selectA.onchange = (e) => {
-	countryA = e.target.value;
-	populateAll();
-};
-
-selectB.onchange = (e) => {
-	countryB = e.target.value;
-	populateAll();
-};
-
-reverse.onclick = () => {
-	const aux = countryA;
-	countryA = countryB;
-	countryB = aux;
-	selectA.value = countryA;
-	selectB.value = countryB;
-	populateAll();
-}
-
 (async () => {
 	try {
-		data = await (await fetch('https://pomber.github.io/covid19/timeseries.json')).json();
-		const dataBrazil = await (await fetch('https://xx9p7hp1p7.execute-api.us-east-1.amazonaws.com/prod/PortalCasos')).json();
+		const data = (await (await fetch('https://xx9p7hp1p7.execute-api.us-east-1.amazonaws.com/prod/PortalCasos')).json()).dias;
 
-		const casosValidos = data.Brazil.filter(date => date.confirmed > 0);
-		data.Brazil = dataBrazil.dias.map((dia, i) => {
-			return {
-				confirmed: dia.casosAcumulado,
-				deaths: dia.obitosAcumulado,
-				recovered: (casosValidos[i] || {}).recovered,
-				date: (casosValidos[i] || { date: dia._id }).date
-			}
-		})
-
-		const countries = Object.keys(data);
-
-		countries.sort((a, b) => {
-			const aLast = data[a][data[a].length - 1];
-			const bLast = data[b][data[b].length - 1];
-			return aLast.confirmed > bLast.confirmed ? -1 : 1
-		});
-
-		countryB = countries[0];
-
-		for (const country of countries) {
-			const optionA = document.createElement('option');
-			const optionB = document.createElement('option');
-			optionA.value = optionB.value = country;
-			optionA.innerText = optionB.innerText = country;
-			selectA.appendChild(optionA);
-			selectB.appendChild(optionB);
+		for (const chart of charts) {
+			chart.destroy();
 		}
 
-		selectA.value = countryA;
-		selectB.value = countryB;
+		populate('Casos acumulado', data, (x) => x.casosAcumulado);
+		populate('Casos novos', data, (x) => x.casosNovos, true, true);
+		populate('Óbitos acumulado', data, (x) => x.obitosAcumulado);
+		populate('Óbitos novos', data, (x) => x.obitosNovos, true, true);
 
-		populateAll();
 		header.style.display = 'block';
 	}
 	catch (err) {
 		console.error(err.stack);
 		error.style.display = 'block';
 	}
+
 	loader.style.display = 'none';
 })();

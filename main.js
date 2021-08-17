@@ -88,6 +88,9 @@ const populate = (title, data, fn, bar = false, avg = false) => {
 	try {
 		const data = (await (await fetch('https://xx9p7hp1p7.execute-api.us-east-1.amazonaws.com/prod/PortalCasos')).json());
 
+		data.dias = data.dias.splice(2);
+		data.semana = data.semana.splice(1);
+
 		populate('Casos acumulado', data.dias, (x) => x.casosAcumulado);
 		populate('Casos novos', data.dias, (x) => x.casosNovos, true, true);
 		populate('Casos por semana', data.semana, (x) => x.casosNovos, true);
